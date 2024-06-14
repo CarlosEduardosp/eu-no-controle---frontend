@@ -7,7 +7,7 @@ export default {
 
 <template>
     <div class="main">
-        <img class="logo" src="../assets/imagens/body.png">
+        <img class="logo" src="../assets/imagens/mao.jpg">
         <div class="titulo">
 
             Eu no Controle

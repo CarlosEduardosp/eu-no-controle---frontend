@@ -1,14 +1,14 @@
 <template>
   <div class="app">
-  
-    </div>
-  <router-view/>
-  
+
+  </div>
+  <router-view />
+
 </template>
 
 <style scoped>
-.app{
-  background-color: #ffffff;
+.app {
+  background-color: #333333;
   position: absolute;
   z-index: -2;
   width: 100vw;
