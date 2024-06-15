@@ -10,8 +10,9 @@ export default {
   data() {
     return {
       lista_de_compras: [],
-      produto: 'arroz',
-      preco: 0,
+      produto: '',
+      preco_total: 0,
+      preco_unitario: 0,
       quantidade: 1,
       total: 0,
       nome_da_lista: '',
@@ -22,12 +23,13 @@ export default {
   methods: {
     cadastrar() {
       // convertendo preço em float
-      this.preco = parseFloat(this.preco)
+      this.preco_total = parseFloat(this.preco_total)
       this.total = parseFloat(this.total)
+      this.preco_unitario = parseFloat(this.preco_unitario)
 
-      this.preco = this.preco * this.quantidade
-      this.total = this.total + this.preco
-      console.log(this.preco, this.total)
+      // calculando o preço
+      this.preco_total = this.preco_unitario * this.quantidade
+      this.total = this.total + this.preco_total
 
 
       //adicionando um valor ao id
@@ -37,7 +39,8 @@ export default {
       const dados = {
         'id': this.id,
         'nome': this.produto,
-        'preco': this.preco,
+        'preco_unitario': this.preco_unitario,
+        'preco_total': this.preco_total,
         'quantidade': this.quantidade
       }
 
@@ -55,8 +58,9 @@ export default {
 
       //limpando os dados do formulário
       this.produto = ''
-      this.preco = ''
-      this.quantidade = ''
+      this.preco_total = 0
+      this.preco_unitario = 0
+      this.quantidade = 0
 
     },
     deletar() {
@@ -64,11 +68,11 @@ export default {
     },
     zerar() {
       this.lista_de_compras = []
-      this.total = ''
+      this.total = 0
     },
     apagar() {
       this.lista_de_compras = []
-      this.total = ''
+      this.total = 0
       this.nome_da_lista = ''
     },
     adiconar_nome_lista() {
@@ -92,21 +96,25 @@ export default {
 
       <label for="" class="titulo">Lista de Compras</label>
 
-      <form @submit.prevent="adiconar_nome_lista">
+      <form @submit.prevent="adiconar_nome_lista" v-show="!this.nome_da_lista">
         <div class="lista">
-          <label for="">Insira o Nome da sua Lista:</label>
+          <label for="" class="inserir_nome">Insira o Nome da sua Lista:</label>
           <input type="text" class="input_nome_lista" v-model="nome_lista" required>
+          <img class="logo" src="../assets/imagens/mao.jpg">
         </div>
       </form>
 
 
-      <form @submit.prevent="cadastrar">
+      <form @submit.prevent="cadastrar" v-show="this.nome_da_lista">
+
+        <p v-show="!this.lista_de_compras[0]">Insira o Primeiro Produto da sua Lista</p>
+        <p v-show="this.lista_de_compras[0]">Insira Aqui o Próximo Produto da sua Lista</p>
 
         <div class="bloco1">
           <label for="">Nome</label>
           <input type="text" class="input_nome" v-model="produto" required>
           <label for="">Preço </label>
-          <input type="number" class="input_preco" step="any" v-model="preco" required>
+          <input type="number" class="input_preco" step="any" min="0.1" v-model="preco_unitario" required>
         </div>
         <div class="bloco2">
           <label for="">Quantidade </label>
@@ -115,12 +123,14 @@ export default {
         </div>
       </form>
 
-      <div class="produtos">
-        <p class="titulo2">Produtos da Lista {{ nome_da_lista }}</p>
+      <div class="produtos" v-show="this.nome_da_lista && this.lista_de_compras[0]">
+        <p class="titulo3">Produtos da Lista {{ nome_da_lista }} </p>
+        <p class="titulo2">Total R$ <p class="total1">{{ total.toFixed(2) }}</p></p>
         <div class="subtitulos">
           <p class="sub_item">Item</p>
           <p class="sub_nome">Nome</p>
-          <p class="sub_preco">Preço</p>
+          <p class="sub_preco">P.U.</p>
+          <p class="sub_preco">P.T.</p>
           <p class="sub_quant">Quant.</p>
           <p class="sub_del">Deletar</p>
         </div>
@@ -128,23 +138,24 @@ export default {
         <div class="itens">
           <p class="sub_item">{{ item.dados['id'] }}</p>
           <p class="sub_nome">{{ item.dados['nome'] }}</p>
-          <p class="sub_preco">{{ item.dados['preco'] }}</p>
+          <p class="sub_preco">{{ item.dados['preco_unitario'].toFixed(2) }}</p>
+          <p class="sub_preco">{{ item.dados['preco_total'].toFixed(2) }}</p>
           <p class="sub_quant">{{ item.dados['quantidade'] }}</p>
           <button @click="deletar" class="btn_deletar">Deletar Item</button>
         </div>
         </p>
         
       </div>
-      <div class="total">
-        <h2>
-             {{ total }}
+      <div class="total" v-show="this.nome_da_lista && this.total">
+        <h2 class="valor">
+             {{ total.toFixed(2) }}
           </h2>
           <h4>
-            Valor Total:
+            Valor Total
           </h4>
         
         </div>
-      <div class="final">
+      <div class="final" v-show="this.nome_da_lista && this.lista_de_compras[0]">
         <button @click="zerar" class="zerar">ZERAR LISTA</button>
         <button @click="apagar" class="apagar">APAGAR LISTA</button>
       </div>
@@ -155,6 +166,16 @@ export default {
 <style scoped>
 .home {
   width: 100%;
+}
+
+.logo{
+  width: 80%;
+  border-radius: 5px;
+  margin-bottom: 10%;
+}
+
+input:focus{
+  outline: none;
 }
 
 .corpo {
@@ -185,9 +206,10 @@ form {
 }
 
 .titulo {
-  color: #FFFACD;
+  color: #f0df46;
   margin: 20px 0px;
   font-size: 1.5rem;
+  text-shadow: 0px 0px 20px #f0df46;
 }
 
 
@@ -198,6 +220,7 @@ form {
   align-items: center;
   justify-content: center;
   gap: 10px;
+  margin-top: 3%;
 }
 
 .bloco2 {
@@ -212,7 +235,7 @@ form {
   border-radius: 5px;
   border: none;
   margin: 10px 10px;
-  background-color: #000000;
+  background-color: #978d2f;
   color: #f3f3f3;
 }
 
@@ -221,7 +244,7 @@ form {
   border-radius: 5px;
   border: none;
   margin: 10px 10px;
-  background-color: #000000;
+  background-color: #978d2f;
   color: #f3f3f3;
 }
 
@@ -230,10 +253,11 @@ form {
   border-radius: 5px;
   border: none;
   margin: 10px 10px;
-  background-color: #000000;
+  background-color: #978d2f;
   color: #f3f3f3;
-  width: 30%;
+  width: 35%;
   font-size: 1rem;
+  font-weight: bold;
 }
 
 .input_nome_lista {
@@ -243,6 +267,7 @@ form {
   font-size: 1rem;
   border-radius: 2px;
   border: none;
+  margin: 5% 0%;
 }
 
 .input_nome {
@@ -250,6 +275,7 @@ form {
   height: 30px;
   text-align: center;
   font-size: 1rem;
+  margin-left: 6% ;
 
 }
 
@@ -269,10 +295,13 @@ form {
 }
 
 .produtos {
+  display: flex;
+  flex-direction: column;  
   background-color: #6d6d6d;
   width: 95%;
   margin: 10px 0px;
   padding: 1%;
+  min-height: 30vh;
 }
 
 .subtitulos {
@@ -282,7 +311,7 @@ form {
 }
 
 .sub_item {
-  width: 15%;
+  width: 10%;
 }
 
 .sub_nome {
@@ -290,7 +319,7 @@ form {
 }
 
 .sub_preco {
-  width: 20%;
+  width: 15%;
 }
 
 .sub_quant {
@@ -319,10 +348,25 @@ form {
 }
 
 .titulo2{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   padding: 2%;
   font-size: 1.2rem;
   font-weight: bold;
+}
+.titulo3{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2%;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #f3f3f3;
 }
 
 .total{
@@ -333,4 +377,26 @@ form {
   justify-content: center;
   margin: 5% 0%;
 }
+
+.valor{
+  background-color: #333333;
+  border:2px solid #f3f3f3;
+  color: #f0df46;
+  padding: 10px;
+  border-radius: 3px ;
+  margin-bottom: 5%;
+}
+
+.inserir_nome{
+  color: #f3f3f3;
+  margin: 5% 0%;
+  font-weight: 500;
+  font-size: 1rem;
+  letter-spacing: 2px;
+}
+.total1{
+  color: #f0df46;
+  margin-left: 2%;
+}
+
 </style>

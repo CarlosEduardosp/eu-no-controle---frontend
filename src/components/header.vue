@@ -33,7 +33,7 @@ export default {
     justify-content: space-around;
     background-color: #fff;
     height: 4rem;
-    box-shadow: 0px 0px 10px 1px #0b5526;
+    box-shadow: 0px 0px 5px 1px #f0df46;
     width: 100%;
 }
 
