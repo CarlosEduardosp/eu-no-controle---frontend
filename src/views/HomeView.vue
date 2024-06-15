@@ -11,13 +11,14 @@ export default {
     return {
       lista_de_compras: [],
       produto: '',
-      preco_total: 0,
-      preco_unitario: 0,
+      preco_total: 0.00,
+      preco_unitario: 0.00,
       quantidade: 1,
-      total: 0,
+      total: 0.00,
       nome_da_lista: '',
       nome_lista: '',
-      id: 0
+      id: 0,
+      dados: []
     }
   },
   methods: {
@@ -43,37 +44,37 @@ export default {
         'preco_total': this.preco_total,
         'quantidade': this.quantidade
       }
-
-      const dados_completos = {
-        'nome_da_lista': this.nome_da_lista,
-        'dados': dados
-      }
+      
 
       // adicionando o produto na lista, salvar isso no banco de dados.
-      this.lista_de_compras.push(dados_completos)
+      this.lista_de_compras.push(dados)
 
       //salvando no localstorage
-      localStorage.setItem('lista_de_compras', JSON.stringify(dados_completos));
+      if(this.lista_de_compras != []){
+        console.log(this.lista_de_compras,'Lista a ser salva')
+        localStorage.setItem('lista_de_compras', JSON.stringify(this.lista_de_compras));
+      }
+      
+      
 
 
       //limpando os dados do formulário
       this.produto = ''
-      this.preco_total = 0
-      this.preco_unitario = 0
-      this.quantidade = 0
+      this.preco_total = 0.00
+      this.preco_unitario = 0.00
+      this.quantidade = 0.00
 
     },
     deletar() {
 
     },
-    zerar() {
-      this.lista_de_compras = []
-      this.total = 0
-    },
+    
     apagar() {
       this.lista_de_compras = []
       this.total = 0
       this.nome_da_lista = ''
+      this.id = 0
+      localStorage.removeItem('lista_de_compras');
     },
     adiconar_nome_lista() {
       this.nome_da_lista = this.nome_lista
@@ -82,9 +83,13 @@ export default {
 
   },
   mounted() {
-    //let valor = JSON.parse(localStorage.getItem('lista_de_compras'));
-    //console.log('valor do localstorage',valor)
-    //this.lista_de_compras.push(valor.dados)
+    let valor = JSON.parse(localStorage.getItem('lista_de_compras'));
+
+    if (valor) {
+      this.lista_de_compras = valor;
+      this.total = this.lista_de_compras.reduce((acc, item) => acc + item.preco_total, 0);
+      this.id = this.lista_de_compras.length ? this.lista_de_compras[this.lista_de_compras.length - 1].id : 0;
+    }    
   }
 }
 </script>
@@ -96,10 +101,11 @@ export default {
 
       <label for="" class="titulo">Lista de Compras</label>
 
+      
+
       <form @submit.prevent="adiconar_nome_lista" v-show="!this.nome_da_lista">
         <div class="lista">
-          <label for="" class="inserir_nome">Insira o Nome da sua Lista:</label>
-          <input type="text" class="input_nome_lista" v-model="nome_lista" required>
+          <button class="input_nome_lista" @click="nome_lista = 'PRODUTOS DA LISTA '" >CLIQUE AQUI PARA INICIAR UMA LISTA</button>
           <img class="logo" src="../assets/imagens/mao.jpg">
         </div>
       </form>
@@ -124,7 +130,7 @@ export default {
       </form>
 
       <div class="produtos" v-show="this.nome_da_lista && this.lista_de_compras[0]">
-        <p class="titulo3">Produtos da Lista {{ nome_da_lista }} </p>
+        <p class="titulo3">{{ nome_da_lista }} </p>
         <p class="titulo2">Total R$ <p class="total1">{{ total.toFixed(2) }}</p></p>
         <div class="subtitulos">
           <p class="sub_item">Item</p>
@@ -134,13 +140,16 @@ export default {
           <p class="sub_quant">Quant.</p>
           <p class="sub_del">Deletar</p>
         </div>
-        <p v-for="(item, index) in lista_de_compras" :key="index">
-        <div class="itens">
-          <p class="sub_item">{{ item.dados['id'] }}</p>
-          <p class="sub_nome">{{ item.dados['nome'] }}</p>
-          <p class="sub_preco">{{ item.dados['preco_unitario'].toFixed(2) }}</p>
-          <p class="sub_preco">{{ item.dados['preco_total'].toFixed(2) }}</p>
-          <p class="sub_quant">{{ item.dados['quantidade'] }}</p>
+       <p v-for="(item, index) in lista_de_compras" :key="index" >
+        <div class="itens" >
+
+          
+         
+          <p class="sub_item" >{{ item.id }}</p>
+          <p class="sub_nome">{{ item.nome }}</p>
+          <p class="sub_preco">{{ item.preco_unitario.toFixed(2) }}</p>
+          <p class="sub_preco">{{ item.preco_total.toFixed(2) }}</p>
+          <p class="sub_quant">{{ item.quantidade }}</p>
           <button @click="deletar" class="btn_deletar">Deletar Item</button>
         </div>
         </p>
@@ -156,8 +165,8 @@ export default {
         
         </div>
       <div class="final" v-show="this.nome_da_lista && this.lista_de_compras[0]">
-        <button @click="zerar" class="zerar">ZERAR LISTA</button>
         <button @click="apagar" class="apagar">APAGAR LISTA</button>
+        <button @click="apagar" class="apagar">FINALIZAR LISTA</button>
       </div>
     </div>
   </div>
@@ -230,12 +239,14 @@ form {
   justify-content: center;
 }
 
-.zerar {
+.finalizar {
   padding: 10px;
   border-radius: 5px;
   border: none;
   margin: 10px 10px;
   background-color: #978d2f;
+  box-shadow: 0px 0px 10px #978d2f;
+  font-weight: bold;
   color: #f3f3f3;
 }
 
@@ -246,6 +257,9 @@ form {
   margin: 10px 10px;
   background-color: #978d2f;
   color: #f3f3f3;
+  font-size: 1rem;
+  box-shadow: 0px 0px 10px #978d2f;
+  font-weight: bold;
 }
 
 .cadastrar {
@@ -254,20 +268,23 @@ form {
   border: none;
   margin: 10px 10px;
   background-color: #978d2f;
-  color: #f3f3f3;
+
+  color: #fff;
   width: 35%;
   font-size: 1rem;
   font-weight: bold;
 }
 
 .input_nome_lista {
-  width: 80%;
-  height: 30px;
+  width: 85%;
+  height: 50px;
   text-align: center;
-  font-size: 1rem;
+  font-size: 0.8rem;
   border-radius: 2px;
   border: none;
-  margin: 5% 0%;
+  margin: 3% 0%;
+  letter-spacing: 2px;
+  text-align: center;
 }
 
 .input_nome {
