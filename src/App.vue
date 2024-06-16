@@ -7,8 +7,7 @@
 </template>
 
 <style scoped>
-.app {
-  background-color: #333333;
+.app {  
   position: absolute;
   z-index: -2;
   width: 100vw;

@@ -33,7 +33,7 @@ export default {
     justify-content: space-around;
     background-color: #fff;
     height: 4rem;
-    box-shadow: 0px 0px 5px 1px #f0df46;
+    box-shadow: 0px 0px 5px 1px #000;
     width: 100%;
 }
 
@@ -57,7 +57,7 @@ export default {
     list-style-type: none;
     text-decoration: none;
     font-size: 1rem;
-    color: #0b5526;
+    color: #000;
     margin-right: 4px;
 }
 
