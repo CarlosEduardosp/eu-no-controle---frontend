@@ -18,7 +18,8 @@ export default {
       nome_da_lista: '',
       nome_lista: '',
       id: 0,
-      dados: []
+      dados: [],
+      iniciar: false
     }
   },
   methods: {
@@ -42,7 +43,9 @@ export default {
         'nome': this.produto,
         'preco_unitario': this.preco_unitario,
         'preco_total': this.preco_total,
-        'quantidade': this.quantidade
+        'quantidade': this.quantidade,
+        'nome_da_lista': this.nome_da_lista,
+        'finalizada': false
       }
 
 
@@ -51,7 +54,6 @@ export default {
 
       //salvando no localstorage
       if (this.lista_de_compras != []) {
-        console.log(this.lista_de_compras, 'Lista a ser salva')
         localStorage.setItem('lista_de_compras', JSON.stringify(this.lista_de_compras));
       }
 
@@ -66,7 +68,7 @@ export default {
 
     },
     voltar() {
-      this.nome_da_lista = ''
+      this.iniciar = false
     },
     deletar(index) {
       // Remover o item da lista
@@ -80,23 +82,46 @@ export default {
     },
 
     apagar() {
-      this.lista_de_compras = []
-      this.total = 0
-      this.nome_da_lista = ''
-      this.id = 0
-      localStorage.removeItem('lista_de_compras');
+
+      const response = confirm('Deseja realmente excluir esta lista, e todos os produtos pertencentes a ela ?')
+      console.log(response)
+
+      if (response) {
+        this.lista_de_compras = []
+        this.total = 0
+        this.iniciar = false
+        this.id = 0
+        this.nome_da_lista = ''
+        this.nome_lista = ''
+        localStorage.removeItem('lista_de_compras');
+      }
+
+
+    },
+    finalizar() {
+      alert('Função em Desenvolvimento.')
+
     },
     adiconar_nome_lista() {
+      console.log(this.nome_da_lista)
       this.nome_da_lista = this.nome_lista
-      this.nome_lista = ''
     }
 
   },
   mounted() {
-    let valor = JSON.parse(localStorage.getItem('lista_de_compras'));
+    let valor = JSON.parse(localStorage.getItem('lista_de_compras'));        
 
     if (valor) {
-      this.lista_de_compras = valor;
+
+      // varrendo o conteudo de valor para achar o nome da lista não finalizada
+      for (let item of valor){
+      if(item.finalizada == false){
+        this.nome_da_lista = valor[0].nome_da_lista
+        console.log(item)
+      }
+    }
+
+      this.lista_de_compras = valor;      
       this.total = this.lista_de_compras.reduce((acc, item) => acc + item.preco_total, 0);
       this.id = this.lista_de_compras.length ? this.lista_de_compras[this.lista_de_compras.length - 1].id : 0;
     }
@@ -113,18 +138,28 @@ export default {
 
 
 
-      <form @submit.prevent="adiconar_nome_lista" v-show="!this.nome_da_lista">
-        <p class="text">"Gerencie suas compras com praticidade e eficiência. Adicione produtos, acompanhe preços e mantenha sua
-        lista sempre atualizada."</p>
+      <form @submit.prevent="" v-show="!this.iniciar">
+        <p class="text">"Gerencie suas compras com praticidade e eficiência. Adicione produtos, acompanhe preços e
+          mantenha sua
+          lista sempre atualizada."</p>
         <div class="lista">
-          <button class="input_nome_lista" @click="nome_lista = 'PRODUTOS DA LISTA '">CLIQUE AQUI PARA INICIAR UMA
+          <button class="input_nome_lista" @click="this.iniciar = true" v-show="!this.lista_de_compras[0]">CLIQUE AQUI
+            PARA INICIAR UMA
             LISTA</button>
-            <img class="logo" src="../assets/imagens/mao.jpg">
+          <button class="input_nome_lista" @click="this.iniciar = true" v-show="this.lista_de_compras[0]">CLIQUE AQUI
+            PARA CONTINUAR SUA
+            LISTA</button>
+          <img class="logo" src="../assets/imagens/mao.jpg">
         </div>
       </form>
 
+      <form @submit.prevent="adiconar_nome_lista" class="bloco1" v-show="this.iniciar && !this.nome_da_lista"  >
+          <label for="">Escolha um Nome para sua Lista </label>
+          <input type="text" class="input_nome" v-model="this.nome_lista"  required>
+          <button type="submit" >Ok</button>
+      </form>
 
-      <form @submit.prevent="cadastrar" v-show="this.nome_da_lista">
+      <form @submit.prevent="cadastrar" v-show="this.iniciar && this.nome_da_lista">        
 
         <p v-show="!this.lista_de_compras[0]">Insira o Primeiro Produto da sua Lista</p>
         <p v-show="this.lista_de_compras[0]">Insira Aqui o Próximo Produto da sua Lista</p>
@@ -142,8 +177,8 @@ export default {
         </div>
       </form>
 
-      <div class="produtos" v-show="this.nome_da_lista && this.lista_de_compras[0]">
-        <p class="titulo3">{{ nome_da_lista }} </p>
+      <div class="produtos" v-show="this.iniciar && this.nome_da_lista && this.lista_de_compras[0]">
+        <p class="titulo3">Lista de Compras: {{ nome_da_lista }} </p>
         <p class="titulo2">Valor Total R$
         <p class="total1">{{ total.toFixed(2) }}</p>
         </p>
@@ -170,7 +205,7 @@ export default {
         </p>
 
       </div>
-      <div class="total" v-show="this.nome_da_lista && this.total">
+      <div class="total" v-show="this.nome_da_lista && this.iniciar && this.total">
         <p class="titulo3">
           Valor Total da Sua Lista
         </p>
@@ -180,10 +215,13 @@ export default {
         </h2>
 
       </div>
-      <div class="final" v-show="this.nome_da_lista && this.lista_de_compras[0]">
-        <button @click="voltar" class="voltar">VOLTAR PÁGINA</button>
-        <button @click="apagar" class="apagar">APAGAR LISTA</button>
-        <button @click="apagar" class="finalizar">FINALIZAR LISTA</button>
+      <div class="final">
+        <button @click="voltar" class="voltar" v-show="this.iniciar">VOLTAR
+          PÁGINA</button>
+        <button @click="apagar" class="apagar" v-show="this.iniciar && this.nome_da_lista && this.lista_de_compras[0]">APAGAR
+          LISTA</button>
+        <button @click="finalizar" class="finalizar" v-show="this.iniciar && this.nome_da_lista && this.lista_de_compras[0]">FINALIZAR
+          LISTA</button>
       </div>
     </div>
   </div>
@@ -194,7 +232,7 @@ export default {
   width: 100%;
 }
 
-.text{
+.text {
   text-align: center;
   width: 95%;
   font-size: 0.88rem;
@@ -283,6 +321,7 @@ form {
   height: auto;
   margin-bottom: 1rem;
 }
+
 .voltar {
   padding: 15px;
   border-radius: 5px;
@@ -297,6 +336,7 @@ form {
   height: auto;
   margin-bottom: 1rem;
 }
+
 .finalizar {
   padding: 15px;
   border-radius: 5px;
