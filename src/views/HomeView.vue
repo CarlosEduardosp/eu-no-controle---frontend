@@ -17,9 +17,10 @@ export default {
       total: 0.00,
       nome_da_lista: '',
       nome_lista: '',
-      id: 0,
       dados: [],
-      iniciar: false
+      iniciar: false,
+      id: 0,
+      listas_salvas: []
     }
   },
   methods: {
@@ -33,13 +34,8 @@ export default {
       this.preco_total = this.preco_unitario * this.quantidade
       this.total = this.total + this.preco_total
 
-
-      //adicionando um valor ao id
-      this.id = this.id + 1
-
       // adiquirindo os dados do produto
       const dados = {
-        'id': this.id,
         'nome': this.produto,
         'preco_unitario': this.preco_unitario,
         'preco_total': this.preco_total,
@@ -54,7 +50,8 @@ export default {
 
       //salvando no localstorage
       if (this.lista_de_compras != []) {
-        localStorage.setItem('lista_de_compras', JSON.stringify(this.lista_de_compras));
+        let chave = this.nome_da_lista
+        localStorage.setItem(chave, JSON.stringify(this.lista_de_compras));
       }
 
 
@@ -68,7 +65,9 @@ export default {
 
     },
     voltar() {
-      this.iniciar = false
+      this.iniciar = true
+      this.nome_da_lista = ''
+      this.iniciando()
     },
     deletar(index) {
       // Remover o item da lista
@@ -78,55 +77,111 @@ export default {
       this.total = this.lista_de_compras.reduce((acc, item) => acc + item.preco_total, 0);
 
       // Atualizar o localstorage
-      localStorage.setItem('lista_de_compras', JSON.stringify(this.lista_de_compras));
+      localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
     },
 
     apagar() {
-
+      // recebe a confirmação do úsuario
       const response = confirm('Deseja realmente excluir esta lista, e todos os produtos pertencentes a ela ?')
-      console.log(response)
 
+      // caso a resposta seja sim ou ok
       if (response) {
         this.lista_de_compras = []
         this.total = 0
         this.iniciar = false
-        this.id = 0
-        this.nome_da_lista = ''
         this.nome_lista = ''
-        localStorage.removeItem('lista_de_compras');
+        //deleta os dados da lista do banco localstorage
+        localStorage.removeItem(this.nome_da_lista);
+        this.nome_da_lista = ''
+        this.listas_salvas = []
+        this.iniciando()
       }
-
 
     },
     finalizar() {
+
+      let valor = JSON.parse(localStorage.getItem(this.nome_da_lista));
+
+      if (valor) {
+
+        this.lista_de_compras = []
+
+        for (let item of valor) {
+
+          if (item.nome_da_lista == this.nome_da_lista) {
+
+            const dados = {
+              'nome': item.nome,
+              'preco_unitario': item.preco_unitario,
+              'preco_total': item.preco_total,
+              'quantidade': item.quantidade,
+              'nome_da_lista': item.nome_da_lista,
+              'finalizada': !item.finalizada
+            }
+
+            // adicionando o produto na lista, salvar isso no banco de dados.
+
+            this.lista_de_compras.push(dados)
+
+            //salvando no localstorage
+            if (this.lista_de_compras != []) {
+              localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
+            }
+
+          }
+
+        }
+
+      }
+
       alert('Função em Desenvolvimento.')
 
     },
     adiconar_nome_lista() {
       console.log(this.nome_da_lista)
       this.nome_da_lista = this.nome_lista
+      this.lista_de_compras = []
+      this.total = 0
+      this.nome_lista = ''
+    },
+    recuperarTodosOsItens() {
+      let todosOsItens = [];
+      // Itera sobre todas as chaves no localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        let chave = localStorage.key(i);
+        let valor = JSON.parse(localStorage.getItem(chave));
+        todosOsItens.push({ chave, valor });
+      }
+      return todosOsItens;
+    },
+    preencher_lista(chave, valor) {
+      this.nome_da_lista = chave
+      this.lista_de_compras = valor
+
+      this.total = 0
+      for (let item of valor) {
+        this.total = this.total + item.preco_total
+      }
+
+    },
+    iniciando() {
+      let valor = this.recuperarTodosOsItens()
+
+      this.listas_salvas = []
+
+      for (let lista of valor) {
+        this.listas_salvas.push(lista)
+      }
     }
 
   },
   mounted() {
-    let valor = JSON.parse(localStorage.getItem('lista_de_compras'));        
 
-    if (valor) {
+    this.iniciando()
 
-      // varrendo o conteudo de valor para achar o nome da lista não finalizada
-      for (let item of valor){
-      if(item.finalizada == false){
-        this.nome_da_lista = valor[0].nome_da_lista
-        console.log(item)
-      }
-    }
-
-      this.lista_de_compras = valor;      
-      this.total = this.lista_de_compras.reduce((acc, item) => acc + item.preco_total, 0);
-      this.id = this.lista_de_compras.length ? this.lista_de_compras[this.lista_de_compras.length - 1].id : 0;
-    }
   }
 }
+
 </script>
 
 <template>
@@ -143,23 +198,35 @@ export default {
           mantenha sua
           lista sempre atualizada."</p>
         <div class="lista">
-          <button class="input_nome_lista" @click="this.iniciar = true" v-show="!this.lista_de_compras[0]">CLIQUE AQUI
-            PARA INICIAR UMA
-            LISTA</button>
-          <button class="input_nome_lista" @click="this.iniciar = true" v-show="this.lista_de_compras[0]">CLIQUE AQUI
-            PARA CONTINUAR SUA
-            LISTA</button>
+          <button class="input_nome_lista" @click="this.iniciar = true">CLIQUE AQUI
+            PARA GERENCIAR SUAS COMPRAS</button>
+
           <img class="logo" src="../assets/imagens/mao.jpg">
         </div>
       </form>
 
-      <form @submit.prevent="adiconar_nome_lista" class="bloco1" v-show="this.iniciar && !this.nome_da_lista"  >
-          <label for="">Escolha um Nome para sua Lista </label>
-          <input type="text" class="input_nome" v-model="this.nome_lista"  required>
-          <button type="submit" >Ok</button>
+      <label class="subtitulo" v-show="this.iniciar == true && !this.nome_da_lista"  >Inicie Uma Nova Lista </label>
+
+      <form @submit.prevent="adiconar_nome_lista" class="bloco1" v-show="this.iniciar && !this.nome_da_lista">
+        
+        <div class="nova_lista">
+          <label for="">Dê um Nome para Ela </label>
+          <input type="text" class="input_nome" v-model="this.nome_lista" required>
+          <button type="submit">Ok</button>
+        </div>
       </form>
 
-      <form @submit.prevent="cadastrar" v-show="this.iniciar && this.nome_da_lista">        
+      <label class="subtitulo2" v-show="this.iniciar == true && !this.nome_da_lista" >Continue Uma Lista Já Iniciada </label>
+
+      <div class="lista" v-show="this.iniciar && !this.nome_da_lista">
+        <p v-for="(item, index) in this.listas_salvas" :key="index">
+
+        <p class="chave_listas" @click="preencher_lista(item.chave, item.valor)">{{ item.chave }}</p>
+
+        </p>
+      </div>
+
+      <form @submit.prevent="cadastrar" v-show="this.iniciar && this.nome_da_lista">
 
         <p v-show="!this.lista_de_compras[0]">Insira o Primeiro Produto da sua Lista</p>
         <p v-show="this.lista_de_compras[0]">Insira Aqui o Próximo Produto da sua Lista</p>
@@ -195,7 +262,7 @@ export default {
 
 
 
-          <p class="sub_item">{{ item.id }}</p>
+          <p class="sub_item">{{ index + 1 }}</p>
           <p class="sub_nome">{{ item.nome }}</p>
           <p class="sub_preco">{{ item.preco_unitario.toFixed(2) }}</p>
           <p class="sub_preco">{{ item.preco_total.toFixed(2) }}</p>
@@ -216,11 +283,15 @@ export default {
 
       </div>
       <div class="final">
-        <button @click="voltar" class="voltar" v-show="this.iniciar">VOLTAR
-          PÁGINA</button>
-        <button @click="apagar" class="apagar" v-show="this.iniciar && this.nome_da_lista && this.lista_de_compras[0]">APAGAR
+        <button @click="voltar" class="voltar" v-show="this.iniciar && this.nome_da_lista">VOLTAR PARA
+          LISTAS</button>
+        <button @click="this.iniciar = false" class="voltar" v-show="this.iniciar && !this.nome_da_lista">VOLTAR
+          AO ÍNICIO</button>
+        <button @click="apagar" class="apagar"
+          v-show="this.iniciar && this.nome_da_lista && this.lista_de_compras[0]">APAGAR
           LISTA</button>
-        <button @click="finalizar" class="finalizar" v-show="this.iniciar && this.nome_da_lista && this.lista_de_compras[0]">FINALIZAR
+        <button @click="finalizar" class="finalizar"
+          v-show="this.iniciar && this.nome_da_lista && this.lista_de_compras[0]">FINALIZAR
           LISTA</button>
       </div>
     </div>
@@ -268,6 +339,7 @@ input:focus {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  margin-bottom: 2rem;
 }
 
 form {
@@ -520,5 +592,32 @@ form {
 .total1 {
   color: #f0df46;
   margin-left: 2%;
+}
+
+.nova_lista{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.subtitulo{
+  margin: 2rem 0rem 0rem 0rem;
+  font-size: 1.5rem;
+}
+.subtitulo2{
+  margin: 2rem 0rem 1rem 0rem;
+  font-size: 1.5rem;
+}
+
+.chave_listas{
+  margin: 0.2rem 0rem;
+  background-color: #777777;
+  padding: 0.5rem;
+  width: 80vw;
+  text-align: center;
+  color: #ffffff;
+  border-radius: 5px;
+  
 }
 </style>
