@@ -41,7 +41,7 @@ export default {
         'preco_total': this.preco_total,
         'quantidade': this.quantidade,
         'nome_da_lista': this.nome_da_lista,
-        'finalizada': false
+        'status': false
       }
 
 
@@ -53,10 +53,7 @@ export default {
         let chave = this.nome_da_lista
         localStorage.setItem(chave, JSON.stringify(this.lista_de_compras));
       }
-
-
-
-
+      
       //limpando os dados do formulário
       this.produto = ''
       this.preco_total = 0.00
@@ -116,7 +113,7 @@ export default {
               'preco_total': item.preco_total,
               'quantidade': item.quantidade,
               'nome_da_lista': item.nome_da_lista,
-              'finalizada': !item.finalizada
+              'status': !item.status
             }
 
             // adicionando o produto na lista, salvar isso no banco de dados.
@@ -164,6 +161,7 @@ export default {
       }
 
     },
+
     iniciando() {
       let valor = this.recuperarTodosOsItens()
 
@@ -189,7 +187,7 @@ export default {
     <Menu />
     <div class="corpo">
 
-      <label for="" class="titulo">Lista de Compras</label>
+      <label for="" class="titulo">Registro de Compras</label>
 
 
 
@@ -205,23 +203,42 @@ export default {
         </div>
       </form>
 
-      <label class="subtitulo" v-show="this.iniciar == true && !this.nome_da_lista"  >Inicie Uma Nova Lista </label>
+      <label class="subtitulo" v-show="this.iniciar == true && !this.nome_da_lista">Inicie Uma Nova Lista </label>
 
       <form @submit.prevent="adiconar_nome_lista" class="bloco1" v-show="this.iniciar && !this.nome_da_lista">
-        
+
         <div class="nova_lista">
           <label for="">Dê um Nome para Ela </label>
           <input type="text" class="input_nome" v-model="this.nome_lista" required>
-          <button type="submit">Ok</button>
+          <button type="submit" class="btn_ok">INICIAR</button>
         </div>
       </form>
 
-      <label class="subtitulo2" v-show="this.iniciar == true && !this.nome_da_lista" >Continue Uma Lista Já Iniciada </label>
+      <label class="subtitulo2" v-show="this.iniciar == true && !this.nome_da_lista">Continue Uma Lista Já Iniciada
+      </label>
 
-      <div class="lista" v-show="this.iniciar && !this.nome_da_lista">
+      <div class="sub_lista" v-show="this.iniciar && !this.nome_da_lista">
+
+        <div class="sub_lista2">
+          <P class="data">Data</P>
+          <P class="nome">Nome Lista</P>
+          <P class="valor_total">Valor Total</P>
+          <P class="status">Status</P>
+        </div>
         <p v-for="(item, index) in this.listas_salvas" :key="index">
 
-        <p class="chave_listas" @click="preencher_lista(item.chave, item.valor)">{{ item.chave }}</p>
+        <div class="chave_listas" @click="preencher_lista(item.chave, item.valor)">
+
+          <p class="data">21/06/24</p>
+
+          <p class="nome">{{ item.chave }}</p>
+
+          <p class="valor_total">Total</p>
+
+          <p class="status" v-if="item.valor[0].status">Fechada</p>
+          <p class="status" v-if="!item.valor[0].status">Aberta</p>
+
+        </div>
 
         </p>
       </div>
@@ -594,30 +611,59 @@ form {
   margin-left: 2%;
 }
 
-.nova_lista{
+.nova_lista {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
 }
 
-.subtitulo{
+.subtitulo {
   margin: 2rem 0rem 0rem 0rem;
   font-size: 1.5rem;
 }
-.subtitulo2{
+
+.subtitulo2 {
   margin: 2rem 0rem 1rem 0rem;
   font-size: 1.5rem;
 }
 
-.chave_listas{
+.chave_listas {
+  display: flex;
+  flex-direction: row;
   margin: 0.2rem 0rem;
   background-color: #777777;
   padding: 0.5rem;
-  width: 80vw;
-  text-align: center;
+  width: 95vw;
   color: #ffffff;
   border-radius: 5px;
-  
+}
+
+.btn_ok {
+  padding: 0.3rem;
+  font-weight: 300;
+  margin-left: 2px;
+}
+
+.sub_lista2 {
+  display: flex;
+  flex-direction: row;
+  padding: 0.5rem;
+}
+
+.data {
+  width: 20%;
+}
+
+.nome {
+  width: 40%;
+}
+
+.valor_total {
+  width: 25%;
+}
+
+.status {
+  width: 15%;
 }
 </style>
