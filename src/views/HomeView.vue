@@ -53,7 +53,7 @@ export default {
         let chave = this.nome_da_lista
         localStorage.setItem(chave, JSON.stringify(this.lista_de_compras));
       }
-      
+
       //limpando os dados do formulário
       this.produto = ''
       this.preco_total = 0.00
@@ -67,14 +67,24 @@ export default {
       this.iniciando()
     },
     deletar(index) {
-      // Remover o item da lista
-      this.lista_de_compras.splice(index, 1);
 
-      // Recalcular o total
-      this.total = this.lista_de_compras.reduce((acc, item) => acc + item.preco_total, 0);
+      if (this.lista_de_compras.length == 1) {
+        //deleta os dados da lista do banco localstorage
+        localStorage.removeItem(this.nome_da_lista);
+        this.nome_da_lista = ''
+        this.listas_salvas = []
+        this.iniciando()
+      }
+      else {
+        // Remover o item da lista
+        this.lista_de_compras.splice(index, 1);
 
-      // Atualizar o localstorage
-      localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
+        // Recalcular o total
+        this.total = this.lista_de_compras.reduce((acc, item) => acc + item.preco_total, 0);
+
+        // Atualizar o localstorage
+        localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
+      }
     },
 
     apagar() {
@@ -161,7 +171,25 @@ export default {
       }
 
     },
+    somando_total(nome) {
+      // função para calcular o valor total da lista armazenada.
 
+      var total_menu = 0
+
+
+      for (let item of this.listas_salvas) {
+        if (nome == item.valor[0].nome_da_lista) {
+          for (let item2 of item.valor) {
+            total_menu = total_menu + item2.preco_total
+          }
+          return total_menu
+
+        }
+      }
+
+
+
+    },
     iniciando() {
       let valor = this.recuperarTodosOsItens()
 
@@ -214,10 +242,10 @@ export default {
         </div>
       </form>
 
-      <label class="subtitulo2" v-show="this.iniciar == true && !this.nome_da_lista">Continue Uma Lista Já Iniciada
+      <label class="subtitulo2" v-show="this.iniciar == true && !this.nome_da_lista && this.listas_salvas[0]">Continue Uma Lista Já Iniciada
       </label>
 
-      <div class="sub_lista" v-show="this.iniciar && !this.nome_da_lista">
+      <div class="sub_lista" v-show="this.iniciar && !this.nome_da_lista && this.listas_salvas[0]">
 
         <div class="sub_lista2">
           <P class="data">Data</P>
@@ -233,7 +261,8 @@ export default {
 
           <p class="nome">{{ item.chave }}</p>
 
-          <p class="valor_total">Total</p>
+          <p class="valor_total" v-if="item.valor != []">{{ somando_total(item.valor[0].nome_da_lista).toFixed(2) }}</p>
+          <p class="valor_total" v-else>{{ somando_total('nada') }}</p>
 
           <p class="status" v-if="item.valor[0].status">Fechada</p>
           <p class="status" v-if="!item.valor[0].status">Aberta</p>
