@@ -20,6 +20,7 @@ export default {
       dados: [],
       iniciar: false,
       id: 0,
+      quantidades: 0,
       listas_salvas: []
     }
   },
@@ -29,10 +30,15 @@ export default {
       this.preco_total = parseFloat(this.preco_total)
       this.total = parseFloat(this.total)
       this.preco_unitario = parseFloat(this.preco_unitario)
+      this.quantidade = parseFloat(this.quantidade)
+
+      console.log(this.quantidade)
 
       // calculando o preço
       this.preco_total = this.preco_unitario * this.quantidade
       this.total = this.total + this.preco_total
+
+      const data_criacao_lista = this.pegardata()
 
       // adiquirindo os dados do produto
       const dados = {
@@ -41,6 +47,7 @@ export default {
         'preco_total': this.preco_total,
         'quantidade': this.quantidade,
         'nome_da_lista': this.nome_da_lista,
+        'data': data_criacao_lista,
         'status': false
       }
 
@@ -123,6 +130,7 @@ export default {
               'preco_total': item.preco_total,
               'quantidade': item.quantidade,
               'nome_da_lista': item.nome_da_lista,
+              'data': data_criacao_lista,
               'status': !item.status
             }
 
@@ -198,6 +206,20 @@ export default {
       for (let lista of valor) {
         this.listas_salvas.push(lista)
       }
+    },
+    pegardata() {
+      // Obtendo a data atual
+      const dataAtual = new Date();
+
+      // Extraindo informações da data
+      const dia = dataAtual.getDate();
+      const mes = dataAtual.getMonth() + 1; // Os meses são indexados de 0 a 11
+      const ano = dataAtual.getFullYear();
+
+      // Formatando a data
+      const dataFormatada = `${dia}/${mes}/${ano}`;
+
+      return dataFormatada
     }
 
   },
@@ -242,7 +264,8 @@ export default {
         </div>
       </form>
 
-      <label class="subtitulo2" v-show="this.iniciar == true && !this.nome_da_lista && this.listas_salvas[0]">Continue Uma Lista Já Iniciada
+      <label class="subtitulo2" v-show="this.iniciar == true && !this.nome_da_lista && this.listas_salvas[0]">Continue
+        Uma Lista Já Iniciada
       </label>
 
       <div class="sub_lista" v-show="this.iniciar && !this.nome_da_lista && this.listas_salvas[0]">
@@ -257,12 +280,12 @@ export default {
 
         <div class="chave_listas" @click="preencher_lista(item.chave, item.valor)">
 
-          <p class="data">21/06/24</p>
+          <p class="data">{{ item.valor[0].data }}</p>
 
           <p class="nome">{{ item.chave }}</p>
 
-          <p class="valor_total" v-if="item.valor != []">{{ somando_total(item.valor[0].nome_da_lista).toFixed(2) }}</p>
-          <p class="valor_total" v-else>{{ somando_total('nada') }}</p>
+          <p class="valor_total" v-if="item.valor != []">R$ {{ somando_total(item.valor[0].nome_da_lista).toFixed(2) }}</p>
+          <p class="valor_total" v-else>R$ {{ somando_total('nada') }}</p>
 
           <p class="status" v-if="item.valor[0].status">Fechada</p>
           <p class="status" v-if="!item.valor[0].status">Aberta</p>
@@ -283,12 +306,25 @@ export default {
           <label for="">Preço </label>
           <input type="number" class="input_preco" step="any" min="0.1" v-model="preco_unitario" required>
         </div>
+        <div class="radio">
+          <label>
+            <input class="input_radio" v-model="quantidades" type="radio" value="0" required> Unidade (Un)
+          </label>
+          <label>
+            <input class="input_radio" type="radio" v-model="quantidades" value="1" required> Kilograma (Kg)
+          </label>
+        </div>
         <div class="bloco2">
-          <label for="">Quantidade </label>
-          <input type="number" class="input_quantidade" v-model="quantidade" min="1" required>
+          <label for="" v-if="quantidades == 0">Quant. (Un)</label>
+          <input type="number" class="input_quantidade" v-model="quantidade" min="1" v-if="quantidades == 0" required>
+          <label for="" v-if="quantidades == 1">Quant. (Kg)</label>
+          <input type="number" class="input_quantidade" step="any" v-model="quantidade" min="0.1"
+            v-if="quantidades == 1" required>
+
           <button type="submit" class="cadastrar">CADASTRAR</button>
         </div>
       </form>
+
 
       <div class="produtos" v-show="this.iniciar && this.nome_da_lista && this.lista_de_compras[0]">
         <p class="titulo3">Lista de Compras: {{ nome_da_lista }} </p>
@@ -681,11 +717,11 @@ form {
 }
 
 .data {
-  width: 20%;
+  width: 25%;
 }
 
 .nome {
-  width: 40%;
+  width: 35%;
 }
 
 .valor_total {
@@ -694,5 +730,11 @@ form {
 
 .status {
   width: 15%;
+}
+
+.radio{
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+
 }
 </style>
