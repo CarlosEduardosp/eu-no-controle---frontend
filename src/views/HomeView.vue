@@ -114,6 +114,7 @@ export default {
     },
     finalizar() {
 
+      const data_criacao_lista = this.pegardata()
       let valor = JSON.parse(localStorage.getItem(this.nome_da_lista));
 
       if (valor) {
@@ -278,22 +279,53 @@ export default {
         </div>
         <p v-for="(item, index) in this.listas_salvas" :key="index">
 
-        <div class="chave_listas" @click="preencher_lista(item.chave, item.valor)">
+        <div class="chave_listas" @click="preencher_lista(item.chave, item.valor)" v-if="!item.valor[0].status">
 
           <p class="data">{{ item.valor[0].data }}</p>
 
           <p class="nome">{{ item.chave }}</p>
 
-          <p class="valor_total" v-if="item.valor != []">R$ {{ somando_total(item.valor[0].nome_da_lista).toFixed(2) }}</p>
+          <p class="valor_total" v-if="item.valor != []">R$ {{ somando_total(item.valor[0].nome_da_lista).toFixed(2) }}
+          </p>
           <p class="valor_total" v-else>R$ {{ somando_total('nada') }}</p>
 
-          <p class="status" v-if="item.valor[0].status">Fechada</p>
           <p class="status" v-if="!item.valor[0].status">Aberta</p>
 
         </div>
 
         </p>
       </div>
+
+        <p class="subtitulo2" >Listas
+          Concluídas</p>
+
+
+      <div class="sub_lista" v-show="this.iniciar && !this.nome_da_lista && this.listas_salvas[0]">
+        <div class="sub_lista2" >
+          <P class="data">Data</P>
+          <P class="nome">Nome Lista</P>
+          <P class="valor_total">Valor Total</P>
+          <P class="status">Status</P>
+        </div>
+        <p v-for="(item, index) in this.listas_salvas" :key="index">
+
+        <div class="chave_listas" @click="preencher_lista(item.chave, item.valor)" v-if="item.valor[0].status">
+
+          <p class="data">{{ item.valor[0].data }}</p>
+
+          <p class="nome">{{ item.chave }}</p>
+
+          <p class="valor_total" v-if="item.valor != []">R$ {{ somando_total(item.valor[0].nome_da_lista).toFixed(2) }}
+          </p>
+          <p class="valor_total" v-else>R$ {{ somando_total('nada') }}</p>
+
+          <p class="status" v-if="item.valor[0].status">Fechada</p>
+
+        </div>
+
+        </p>
+      </div>
+
 
       <form @submit.prevent="cadastrar" v-show="this.iniciar && this.nome_da_lista">
 
@@ -732,7 +764,7 @@ form {
   width: 15%;
 }
 
-.radio{
+.radio {
   margin-top: 1rem;
   margin-bottom: 0.5rem;
 
