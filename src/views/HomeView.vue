@@ -21,7 +21,9 @@ export default {
       iniciar: false,
       id: 0,
       quantidades: 0,
-      listas_salvas: []
+      listas_salvas: [],
+      listas_fechadas_true: false,
+      listas_fechadas_false: false
     }
   },
   methods: {
@@ -125,23 +127,94 @@ export default {
 
           if (item.nome_da_lista == this.nome_da_lista) {
 
-            const dados = {
-              'nome': item.nome,
-              'preco_unitario': item.preco_unitario,
-              'preco_total': item.preco_total,
-              'quantidade': item.quantidade,
-              'nome_da_lista': item.nome_da_lista,
-              'data': data_criacao_lista,
-              'status': !item.status
+            if (item.status == false) {
+              const response = confirm('Deseja realmente fechar esta lista?')
+
+              if (response) {
+
+                // adicionando o produto na lista, salvar isso no banco de dados.
+                const dados = {
+                  'nome': item.nome,
+                  'preco_unitario': item.preco_unitario,
+                  'preco_total': item.preco_total,
+                  'quantidade': item.quantidade,
+                  'nome_da_lista': item.nome_da_lista,
+                  'data': data_criacao_lista,
+                  'status': !item.status
+                }
+
+                this.lista_de_compras.push(dados)
+
+                //salvando no localstorage
+                if (this.lista_de_compras != []) {
+                  localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
+                }
+
+              }
+              else {
+                // adicionando o produto na lista, salvar isso no banco de dados.
+                const dados = {
+                  'nome': item.nome,
+                  'preco_unitario': item.preco_unitario,
+                  'preco_total': item.preco_total,
+                  'quantidade': item.quantidade,
+                  'nome_da_lista': item.nome_da_lista,
+                  'data': data_criacao_lista,
+                  'status': item.status
+                }
+
+                this.lista_de_compras.push(dados)
+
+                //salvando no localstorage
+                if (this.lista_de_compras != []) {
+                  localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
+                }
+              }
+
             }
 
-            // adicionando o produto na lista, salvar isso no banco de dados.
+            if (item.status == true) {
+              const response = confirm('Deseja realmente reabrir esta lista?')
 
-            this.lista_de_compras.push(dados)
+              if (response) {
 
-            //salvando no localstorage
-            if (this.lista_de_compras != []) {
-              localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
+                // adicionando o produto na lista, salvar isso no banco de dados.
+                const dados = {
+                  'nome': item.nome,
+                  'preco_unitario': item.preco_unitario,
+                  'preco_total': item.preco_total,
+                  'quantidade': item.quantidade,
+                  'nome_da_lista': item.nome_da_lista,
+                  'data': data_criacao_lista,
+                  'status': !item.status
+                }
+
+                this.lista_de_compras.push(dados)
+
+                //salvando no localstorage
+                if (this.lista_de_compras != []) {
+                  localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
+                }
+              }
+              else {
+                // adicionando o produto na lista, salvar isso no banco de dados.
+                const dados = {
+                  'nome': item.nome,
+                  'preco_unitario': item.preco_unitario,
+                  'preco_total': item.preco_total,
+                  'quantidade': item.quantidade,
+                  'nome_da_lista': item.nome_da_lista,
+                  'data': data_criacao_lista,
+                  'status': item.status
+                }
+
+                this.lista_de_compras.push(dados)
+
+                //salvando no localstorage
+                if (this.lista_de_compras != []) {
+                  localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
+                }
+              }
             }
 
           }
@@ -150,7 +223,7 @@ export default {
 
       }
 
-      alert('Função em Desenvolvimento.')
+      this.iniciando()
 
     },
     adiconar_nome_lista() {
@@ -204,9 +277,37 @@ export default {
 
       this.listas_salvas = []
 
-      for (let lista of valor) {
-        this.listas_salvas.push(lista)
+      if (valor) {
+
+        for (let lista of valor) {
+          this.listas_salvas.push(lista)
+        }
+
+        // listas_fechadas_true
+        for (let lista of valor) {
+          console.log(lista.valor[0].status)
+          if (lista.valor[0].status == true) {
+            this.listas_fechadas_true = true
+            break
+          }
+          else {
+            this.listas_fechadas_true = false
+          }
+        }
+
+        // listas_fechadas_false
+        for (let lista of valor) {
+
+          if (lista.valor[0].status == false) {
+            this.listas_fechadas_false = true
+            break
+          }
+          else {
+            this.listas_fechadas_false = false
+          }
+        }
       }
+
     },
     pegardata() {
       // Obtendo a data atual
@@ -265,11 +366,14 @@ export default {
         </div>
       </form>
 
-      <label class="subtitulo2" v-show="this.iniciar == true && !this.nome_da_lista && this.listas_salvas[0]">Continue
+      <label class="subtitulo2"
+        v-show="this.iniciar == true && !this.nome_da_lista && this.listas_salvas[0] && this.listas_fechadas_false ">Continue
         Uma Lista Já Iniciada
       </label>
+      
 
-      <div class="sub_lista" v-show="this.iniciar && !this.nome_da_lista && this.listas_salvas[0]">
+      <div class="sub_lista"
+        v-show="this.iniciar && !this.nome_da_lista && this.listas_salvas[0] && this.listas_fechadas_false">
 
         <div class="sub_lista2">
           <P class="data">Data</P>
@@ -296,12 +400,13 @@ export default {
         </p>
       </div>
 
-        <p class="subtitulo2" >Listas
-          Concluídas</p>
+      <p class="subtitulo2" v-show="listas_fechadas_true && this.listas_salvas && !this.nome_da_lista && this.iniciar">Listas
+        Concluídas</p>
 
 
-      <div class="sub_lista" v-show="this.iniciar && !this.nome_da_lista && this.listas_salvas[0]">
-        <div class="sub_lista2" >
+      <div class="sub_lista"
+        v-show="this.iniciar && !this.nome_da_lista && this.listas_salvas[0] && listas_fechadas_true">
+        <div class="sub_lista2">
           <P class="data">Data</P>
           <P class="nome">Nome Lista</P>
           <P class="valor_total">Valor Total</P>

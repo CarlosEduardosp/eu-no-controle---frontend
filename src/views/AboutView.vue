@@ -32,27 +32,41 @@ export default {
       <h3>Principais Funcionalidades:</h3>
       <ul>
         <li>
-          <strong>Adicionar Produtos:</strong> Você pode adicionar produtos à sua lista informando o nome, preço unitário e quantidade.
+          <strong>Adicionar Produtos:</strong> Você pode adicionar produtos à sua lista informando o nome, preço
+          unitário, tipo de unidade (unidade ou quilograma) e quantidade.
         </li>
         <li>
-          <strong>Calcular Total:</strong> A aplicação calcula automaticamente o preço total de cada produto e o valor total de todos os
-          produtos na lista.
+          <strong>Calcular Total:</strong> A aplicação calcula automaticamente o preço total de cada produto e o valor
+          total de todos os produtos na lista.
         </li>
         <li>
-          <strong>Salvar Lista:</strong> As listas são salvas no seu navegador, então você pode fechar a página e voltar mais tarde sem
-          perder suas informações.
+          <strong>Salvar Lista:</strong> As listas são salvas no armazenamento local do navegador, permitindo que você
+          feche a página e retorne mais tarde sem perder suas informações. Note que, se o banco de dados do seu
+          navegador for apagado,
+          todas as listas salvas serão perdidas.
         </li>
         <li>
-          <strong>Editar e Deletar:</strong> Você pode deletar produtos individuais da lista ou apagar toda a lista de uma vez.
+          <strong>Editar e Deletar:</strong> Você pode deletar produtos individuais da lista ou apagar toda a lista de
+          uma vez.
         </li>
         <li>
           <strong>Nomear Lista:</strong> Dê um nome à sua lista de compras para facilitar a organização.
         </li>
+        <li>
+          <strong>Gerenciar Listas Existentes:</strong> Continue adicionando produtos a listas já iniciadas ou visualize
+          listas concluídas.
+        </li>
+        <li>
+          <strong>Finalizar e Reabrir Listas:</strong> Marque listas como finalizadas para concluir suas compras e
+          reabra-as se necessário.
+        </li>
       </ul>
-      <p>É uma maneira simples e eficaz de gerenciar suas compras e garantir que você não esqueça de nada importante!</p>
+      <p>É uma maneira simples e eficaz de gerenciar suas compras, garantindo que você não esqueça de nada importante e
+        mantendo um registro organizado de suas despesas!</p>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .about {
@@ -101,7 +115,7 @@ p {
   line-height: 1.6;
 }
 
-strong{
+strong {
   color: #f3f3f3;
 }
 </style>
