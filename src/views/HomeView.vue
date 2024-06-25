@@ -115,117 +115,52 @@ export default {
 
     },
     finalizar() {
+  const data_criacao_lista = this.pegardata();
+  let valor = JSON.parse(localStorage.getItem(this.nome_da_lista));
 
-      const data_criacao_lista = this.pegardata()
-      let valor = JSON.parse(localStorage.getItem(this.nome_da_lista));
+  if (valor) {
+    this.lista_de_compras = [];
 
-      if (valor) {
+    // Verificar o status do primeiro item para determinar se devemos fechar ou reabrir a lista
+    let primeiroItem = valor[0];
+    let acao = primeiroItem.status ? 'reabrir' : 'fechar';
+    const response = confirm(`Deseja realmente ${acao} esta lista?`);
 
-        this.lista_de_compras = []
-
-        for (let item of valor) {
-
-          if (item.nome_da_lista == this.nome_da_lista) {
-
-            if (item.status == false) {
-              const response = confirm('Deseja realmente fechar esta lista?')
-
-              if (response) {
-
-                // adicionando o produto na lista, salvar isso no banco de dados.
-                const dados = {
-                  'nome': item.nome,
-                  'preco_unitario': item.preco_unitario,
-                  'preco_total': item.preco_total,
-                  'quantidade': item.quantidade,
-                  'nome_da_lista': item.nome_da_lista,
-                  'data': data_criacao_lista,
-                  'status': !item.status
-                }
-
-                this.lista_de_compras.push(dados)
-
-                //salvando no localstorage
-                if (this.lista_de_compras != []) {
-                  localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
-                }
-
-              }
-              else {
-                // adicionando o produto na lista, salvar isso no banco de dados.
-                const dados = {
-                  'nome': item.nome,
-                  'preco_unitario': item.preco_unitario,
-                  'preco_total': item.preco_total,
-                  'quantidade': item.quantidade,
-                  'nome_da_lista': item.nome_da_lista,
-                  'data': data_criacao_lista,
-                  'status': item.status
-                }
-
-                this.lista_de_compras.push(dados)
-
-                //salvando no localstorage
-                if (this.lista_de_compras != []) {
-                  localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
-                }
-              }
-
-            }
-
-            if (item.status == true) {
-              const response = confirm('Deseja realmente reabrir esta lista?')
-
-              if (response) {
-
-                // adicionando o produto na lista, salvar isso no banco de dados.
-                const dados = {
-                  'nome': item.nome,
-                  'preco_unitario': item.preco_unitario,
-                  'preco_total': item.preco_total,
-                  'quantidade': item.quantidade,
-                  'nome_da_lista': item.nome_da_lista,
-                  'data': data_criacao_lista,
-                  'status': !item.status
-                }
-
-                this.lista_de_compras.push(dados)
-
-                //salvando no localstorage
-                if (this.lista_de_compras != []) {
-                  localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
-                }
-              }
-              else {
-                // adicionando o produto na lista, salvar isso no banco de dados.
-                const dados = {
-                  'nome': item.nome,
-                  'preco_unitario': item.preco_unitario,
-                  'preco_total': item.preco_total,
-                  'quantidade': item.quantidade,
-                  'nome_da_lista': item.nome_da_lista,
-                  'data': data_criacao_lista,
-                  'status': item.status
-                }
-
-                this.lista_de_compras.push(dados)
-
-                //salvando no localstorage
-                if (this.lista_de_compras != []) {
-                  localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
-                }
-              }
-            }
-
-          }
-
-        }
-
+    if (response) {
+      for (let item of valor) {
+        const dados = {
+          'nome': item.nome,
+          'preco_unitario': item.preco_unitario,
+          'preco_total': item.preco_total,
+          'quantidade': item.quantidade,
+          'nome_da_lista': item.nome_da_lista,
+          'data': data_criacao_lista,
+          'status': !item.status
+        };
+        this.lista_de_compras.push(dados);
       }
+      localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
+      this.nome_da_lista = ''
+    } else {
+      for (let item of valor) {
+        const dados = {
+          'nome': item.nome,
+          'preco_unitario': item.preco_unitario,
+          'preco_total': item.preco_total,
+          'quantidade': item.quantidade,
+          'nome_da_lista': item.nome_da_lista,
+          'data': data_criacao_lista,
+          'status': item.status
+        };
+        this.lista_de_compras.push(dados);
+      }
+      localStorage.setItem(this.nome_da_lista, JSON.stringify(this.lista_de_compras));
+    }
+  }
 
-      this.iniciando()
+  this.iniciando();
+},
 
-    },
     adiconar_nome_lista() {
       console.log(this.nome_da_lista)
       this.nome_da_lista = this.nome_lista
